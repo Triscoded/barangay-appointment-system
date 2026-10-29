@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barangay Binubusan - Appointment System</title>
+    <style>
+        :root {
+            --primary-blue: #1A365D;
+            --accent-red: #9B2C2C;
+            --accent-yellow: #D69E2E;
+            --bg-light: #F7FAFC;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 20px;
+            color: #2D3748;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .bg-shape-1 {
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: rgba(214, 158, 46, 0.1);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .bg-shape-2 {
+            position: absolute;
+            top: 400px;
+            left: -100px;
+            width: 400px;
+            height: 400px;
+            background: rgba(26, 54, 93, 0.05);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-banner {
+            background: var(--primary-blue);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(26, 54, 93, 0.2);
+            margin-bottom: 25px;
+            border-bottom: 5px solid var(--accent-yellow);
+        }
+
+        .hero-banner h1 {
+            margin: 0 0 10px 0;
+            font-size: 1.8rem;
+        }
+
+        .hero-banner p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--primary-blue);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--primary-blue);
+            font-size: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            background: #fff;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1);
+        }
+
+        .btn-submit {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: #2A4365;
+        }
+
+        .btn-track {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-track:hover {
+            background: #2A4365;
+        }
+
+        .track-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .alert-success { background: #C6F6D5; color: #22543D; border: 1px solid #9AE6B4; }
+        .alert-error { background: #FED7D7; color: #9B2C2C; border: 1px solid #FEB2B2; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-pending { background: #FEFCBF; color: #975A16; }
+        .status-completed { background: #C6F6D5; color: #22543D; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-shape-1"></div>
+    <div class="bg-shape-2"></div>
+
+    <div class="container">
+        <div class="hero-banner">
+            <h1>Brgy. Binubusan Appointment System</h1>
+            <p>Book your schedule online & track your document status instantly.</p>
+        </div>
+
+        <div class="card">
+            <h3>Track Your Request Status</h3>
+            <p style="font-size: 0.9rem; color: #64748B; margin-bottom: 15px;">Enter your reference code (e.g., BRGY-1234) to check live progress.</p>
+            <div class="track-row">
+                <input type="text" id="trackCodeInput" placeholder="ENTER REF CODE (E.G. BRGY-XXXX)" style="text-transform: uppercase;">
+                <button class="btn-track" onclick="trackStatus()">Track</button>
+            </div>
+            <div id="trackResult" class="alert"></div>
+        </div>
+
+        <div class="card">
+            <h3>New Document Appointment</h3>
+            <form id="appointmentForm" onsubmit="submitAppointment(event)">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" placeholder="Juan Dela Cruz" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="documentType">Document Type</label>
+                    <select id="documentType" required>
+                        <option value="" disabled selected>-- Select Document Type --</option>
+                        <option value="Barangay Clearance">Barangay Clearance</option>
+                        <option value="Certificate of Indigency">Certificate of Indigency</option>
+                        <option value="Certificate of Residency">Certificate of Residency</option>
+                        <option value="Business Permit">Business Permit</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="appointmentDate">Preferred Date (Future Dates Only)</label>
+                    <input type="date" id="appointmentDate" onchange="fetchSlotAvailability()" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="timeSlot">Select Time Slot (Max 15 people per slot)</label>
+                    <select id="timeSlot" required disabled>
+                        <option value="" disabled selected>-- Choose a Date First --</option>
+                        <option value="08:00 AM - 09:00 AM">08:00 AM - 09:00 AM</option>
+                        <option value="09:00 AM - 10:00 AM">09:00 AM - 10:00 AM</option>
+                        <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
+                        <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
+                        <option value="12:00 PM - 01:00 PM (Lunch Break)" disabled>12:00 PM - 01:00 PM (Lunch Break)</option>
+                        <option value="01:00 PM - 02:00 PM">01:00 PM - 02:00 PM</option>
+                        <option value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
+                        <option value="03:00 PM - 04:00 PM">03:00 PM - 04:00 PM</option>
+                        <option value="04:00 PM - 05:00 PM">04:00 PM - 05:00 PM</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="captchaAnswer">Robot Verification (Human Check)</label>
+                    <p style="margin: 0 0 8px 0; font-size: 0.85rem; color: #4A5568;">Please solve this simple math question: <strong>What is 7 + 3?</strong></p>
+                    <input type="number" id="captchaAnswer" placeholder="Enter answer here" required>
+                </div>
+
+                <button type="submit" class="btn-submit">Submit Appointment Request</button>
+            </form>
+
+            <div id="formAlert" class="alert"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('appointmentDate').min = today;
+        });
+
+        async function fetchSlotAvailability() {
+            const dateVal = document.getElementById('appointmentDate').value;
+            const slotSelect = document.getElementById('timeSlot');
+            
+            if (!dateVal) return;
+
+            try {
+                const res = await fetch(`/api/slots-availability?date=${dateVal}`);
+                const bookedCounts = await res.json();
+                
+                slotSelect.disabled = false;
+                for (let option of slotSelect.options) {
+                    if (option.value === "" || option.disabled) continue;
+                    
+                    const slotName = option.value;
+                    const currentBookings = bookedCounts[slotName] || 0;
+                    const remaining = 15 - currentBookings;
+
+                    const baseText = slotName.split(' (')[0];
+                    if (remaining <= 0) {
+                        option.text = `${baseText} - FULLY BOOKED`;
+                        option.disabled = true;
+                        option.style.color = '#E53E3E';
+                    } else {
+                        option.text = `${baseText} (${remaining} / 15 slots available)`;
+                        option.disabled = false;
+                        option.style.color = '#2D3748';
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to fetch slot availability', err);
+            }
+        }
+
+        async function submitAppointment(e) {
+            e.preventDefault();
+            const alertBox = document.getElementById('formAlert');
+
+            const payload = {
+                full_name: document.getElementById('fullName').value,
+                document_type: document.getElementById('documentType').value,
+                appointment_date: document.getElementById('appointmentDate').value,
+                time_slot: document.getElementById('timeSlot').value,
+                captcha_answer: document.getElementById('captchaAnswer').value
+            };
+
+            try {
+                const res = await fetch('/api/appointments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                alertBox.style.display = 'block';
+                if (res.ok) {
+                    alertBox.className = 'alert alert-success';
+                    alertBox.innerHTML = `<strong>Success!</strong> ${data.message}<br>Your Reference Code: <strong style="font-size: 1.2rem; color: #1A365D;">${data.reference_code}</strong><br><small>Please save this code to track your request status.</small>`;
+                    document.getElementById('appointmentForm').reset();
+                    document.getElementById('timeSlot').disabled = true;
+                } else {
+                    alertBox.className = 'alert alert-error';
+                    alertBox.innerText = data.error;
+                }
+            } catch (err) {
+                console.error('Submission error:', err);
+                alertBox.style.display = 'block';
+                alertBox.className = 'alert alert-error';
+                alertBox.innerText = 'An unexpected error occurred. Please try again.';
+            }
+        }
+
+        async function trackStatus() {
+            const code = document.getElementById('trackCodeInput').value.trim();
+            const resultBox = document.getElementById('trackResult');
+
+            if (!code) {
+                resultBox.style.display = 'block';
+                resultBox.className = 'alert alert-error';
+                resultBox.innerText = 'Please enter a reference code.';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/appointments/track/${code}`);
+                const data = await res.json();
+
+                resultBox.style.display = 'block';
+                if (res.ok) {
+                    const statusClass = data.status === 'Completed' ? 'status-completed' : 'status-pending';
+                    resultBox.className = 'alert alert-success';
+                    resultBox.innerHTML = `
+                        <strong>Name:</strong> ${data.full_name} <br>
+                        <strong>Document:</strong> ${data.document_type} <br>
+                        <strong>Date & Slot:</strong> ${data.appointment_date} (${data.time_slot}) <br>
+                        <strong>Status:</strong> <span class="status-badge ${statusClass}">${data.status}</span>
+                    `;
+                } else {
+                    resultBox.className = 'alert alert-error';
+                    resultBox.innerText = data.error;
+                }
+            } catch (err) {
+                console.error('Tracking error:', err);
+                resultBox.style.display = 'block';
+                resultBox.className = 'alert alert-error';
+                resultBox.innerText = 'Could not reach the tracking server.';
+            }
+        }
+    </script>
+</body>
+</html>

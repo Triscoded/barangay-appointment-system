@@ -1,0 +1,11 @@
+# Python / Flask cache
+__pycache__/
+*.pyc
+instance/
+
+# Local SQLite Database
+barangay.db
+
+# Virtual environments
+venv/
+env/

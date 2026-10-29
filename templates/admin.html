@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barangay Binubusan - Admin Dashboard</title>
+    <style>
+        :root {
+            --primary-blue: #1A365D;
+            --accent-red: #9B2C2C;
+            --accent-yellow: #D69E2E;
+            --bg-light: #F7FAFC;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 20px;
+            color: #2D3748;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .admin-header {
+            background: var(--primary-blue);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(26, 54, 93, 0.2);
+            margin-bottom: 25px;
+            border-bottom: 5px solid var(--accent-yellow);
+        }
+
+        .admin-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .btn-logout {
+            background: var(--accent-red);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #742A2A;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-blue);
+        }
+
+        .metric-card.pending { border-left-color: var(--accent-yellow); }
+        .metric-card.completed { border-left-color: #38A169; }
+
+        .metric-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            color: #64748B;
+            text-transform: uppercase;
+        }
+
+        .metric-card .metric-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1E293B;
+            margin: 0;
+        }
+
+        .card-action {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-top: 4px solid var(--primary-blue);
+            display: none;
+        }
+
+        .card-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .card-action h3 {
+            margin: 0 0 5px 0;
+            color: var(--primary-blue);
+            font-size: 1.1rem;
+        }
+
+        .card-action p {
+            margin: 0;
+            color: #64748B;
+            font-size: 0.9rem;
+        }
+
+        .collapsible-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: none;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-box, .filter-select, .date-picker {
+            padding: 10px 14px;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .search-box { flex: 1; min-width: 250px; }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover { background: #2A4365; }
+
+        .btn-excel {
+            background: #276749;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-excel:hover { background: #22543D; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #E2E8F0;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #F8FAFC;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-pending { background: #FEFCBF; color: #975A16; }
+        .status-completed { background: #C6F6D5; color: #22543D; }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action-sm {
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-complete { background: #C6F6D5; color: #22543D; }
+        .btn-delete { background: #FED7D7; color: #9B2C2C; }
+    </style>
+</head>
+<body onload="initAdminDashboard()">
+
+    <div class="container">
+        <div class="admin-header">
+            <div>
+                <h1>Barangay Binubusan - Admin Dashboard</h1>
+                <p id="adminUserBadge" style="margin: 5px 0 0 0; font-size: 0.9rem; opacity: 0.85;"></p>
+            </div>
+            <button class="btn-logout" onclick="logoutAdmin()">Logout</button>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h4>Total Appointments</h4>
+                <p class="metric-value" id="metricTotal">0</p>
+            </div>
+            <div class="metric-card pending">
+                <h4>Pending Requests</h4>
+                <p class="metric-value" id="metricPending">0</p>
+            </div>
+            <div class="metric-card completed">
+                <h4>Completed / Claimed</h4>
+                <p class="metric-value" id="metricCompleted">0</p>
+            </div>
+        </div>
+
+        <!-- SUPER ADMIN MANAGEMENT & AUDIT LOG CARD -->
+        <div id="staffCard" class="card-action" onclick="toggleSection('staffSection')">
+            <h3>Staff Account Management & Activity Audit Log</h3>
+            <p>Monitor staff movements, create/remove personnel, and update super admin credentials.</p>
+        </div>
+
+        <div id="staffSection" class="collapsible-section">
+            <h3 style="margin-top: 0; color: var(--primary-blue); font-size: 1.15rem;">Create New Staff Account</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 25px;">
+                <input type="text" id="newStaffUser" placeholder="Username" class="search-box" style="min-width: 180px;">
+                <input type="password" id="newStaffPass" placeholder="Password (min 6 chars)" class="search-box" style="min-width: 180px;">
+                <button class="btn-primary" onclick="createStaffAccount()">Create Account</button>
+            </div>
+            <p id="staffMsg" style="font-weight: bold; font-size: 0.9rem; margin-bottom: 20px;"></p>
+
+            <h3 style="color: var(--primary-blue); font-size: 1.15rem; margin-top: 20px;">Change Super Admin Password</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 25px;">
+                <input type="password" id="superAdminNewPass" placeholder="New Password (min 6 chars)" class="search-box" style="min-width: 250px;">
+                <button class="btn-primary" onclick="changeSuperAdminPassword()">Update Password</button>
+            </div>
+            <p id="superPassMsg" style="font-weight: bold; font-size: 0.9rem; margin-bottom: 25px;"></p>
+
+            <h3 style="color: var(--primary-blue); font-size: 1.15rem; margin-bottom: 10px;">Authorized System Users</h3>
+            <table style="margin-bottom: 30px;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="staffTableBody"></tbody>
+            </table>
+
+            <h3 style="color: var(--primary-blue); font-size: 1.15rem; margin-bottom: 10px;">Staff Activity & Movement Audit Log</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Username</th>
+                        <th>Action Performed</th>
+                    </tr>
+                </thead>
+                <tbody id="auditTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="controls-row">
+                <input type="text" id="searchInput" class="search-box" placeholder="Search by resident name or reference code..." onkeyup="filterAppointments()">
+                <select id="docFilter" class="filter-select" onchange="filterAppointments()">
+                    <option value="">All Documents</option>
+                    <option value="Barangay Clearance">Barangay Clearance</option>
+                    <option value="Certificate of Indigency">Certificate of Indigency</option>
+                    <option value="Certificate of Residency">Certificate of Residency</option>
+                    <option value="Business Permit">Business Permit</option>
+                </select>
+                <input type="date" id="dateFilter" class="date-picker" onchange="loadMetricsAndAppointments()">
+                <a id="downloadExcelBtn" href="#" class="btn-excel" target="_blank">📥 Export Attendance (.xlsx)</a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ref Code</th>
+                        <th>Full Name</th>
+                        <th>Document Type</th>
+                        <th>Date & Time Slot</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="appointmentsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let allAppointments = [];
+
+        async function initAdminDashboard() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateFilter').value = today;
+
+            await checkSessionAndRole();
+            await loadMetricsAndAppointments();
+        }
+
+        async function checkSessionAndRole() {
+            try {
+                const res = await fetch('/api/admin/session');
+                const data = await res.json();
+                if (!data.logged_in) {
+                    window.location.href = '/admin';
+                    return;
+                }
+                document.getElementById('adminUserBadge').innerText = `Logged in as: ${data.username} (${data.role.toUpperCase()})`;
+
+                if (data.role === 'super_admin') {
+                    document.getElementById('staffCard').style.display = 'block';
+                    loadStaffUsers();
+                    loadAuditLogs();
+                }
+            } catch (err) {
+                console.error('Session check failed', err);
+            }
+        }
+
+        function toggleSection(sectionId) {
+            const sec = document.getElementById(sectionId);
+            sec.style.display = sec.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function loadMetricsAndAppointments() {
+            const dateVal = document.getElementById('dateFilter').value;
+            document.getElementById('downloadExcelBtn').href = `/api/admin/download-attendance?date=${dateVal}`;
+
+            try {
+                const metricsRes = await fetch(`/api/admin/metrics?date=${dateVal}`);
+                const metrics = await metricsRes.json();
+                document.getElementById('metricTotal').innerText = metrics.total;
+                document.getElementById('metricPending').innerText = metrics.pending;
+                document.getElementById('metricCompleted').innerText = metrics.completed;
+            } catch (err) {
+                console.error('Failed to load metrics', err);
+            }
+
+            try {
+                const aptRes = await fetch('/api/appointments');
+                allAppointments = await aptRes.json();
+                filterAppointments();
+            } catch (err) {
+                console.error('Failed to load appointments', err);
+            }
+        }
+
+        function filterAppointments() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const docType = document.getElementById('docFilter').value;
+            const dateVal = document.getElementById('dateFilter').value;
+            const tbody = document.getElementById('appointmentsTableBody');
+
+            tbody.innerHTML = '';
+
+            const filtered = allAppointments.filter(apt => {
+                const matchesSearch = apt.full_name.toLowerCase().includes(query) || apt.reference_code.toLowerCase().includes(query);
+                const matchesDoc = !docType || apt.document_type === docType;
+                const matchesDate = !dateVal || apt.appointment_date === dateVal;
+                return matchesSearch && matchesDoc && matchesDate;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748B;">No appointment records found.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(apt => {
+                const statusClass = apt.status === 'Completed' ? 'status-completed' : 'status-pending';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${apt.reference_code}</strong></td>
+                    <td>${apt.full_name}</td>
+                    <td>${apt.document_type}</td>
+                    <td>${apt.appointment_date}<br><small style="color: #64748B;">${apt.time_slot}</small></td>
+                    <td><span class="status-badge ${statusClass}">${apt.status}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            ${apt.status === 'Pending' ? `<button class="btn-action-sm btn-complete" onclick="updateStatus(${apt.id}, 'Completed')">Mark Claimed</button>` : `<button class="btn-action-sm" style="background:#E2E8F0;" onclick="updateStatus(${apt.id}, 'Pending')">Set Pending</button>`}
+                            <button class="btn-action-sm btn-delete" onclick="deleteAppointment(${apt.id})">Clear</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function updateStatus(id, newStatus) {
+            try {
+                await fetch(`/api/appointments/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                loadMetricsAndAppointments();
+                loadAuditLogs();
+            } catch (err) {
+                console.error('Failed to update status', err);
+            }
+        }
+
+        async function deleteAppointment(id) {
+            if (!confirm('Are you sure you want to clear this appointment record?')) return;
+            try {
+                await fetch(`/api/appointments/${id}`, { method: 'DELETE' });
+                loadMetricsAndAppointments();
+                loadAuditLogs();
+            } catch (err) {
+                console.error('Failed to delete appointment', err);
+            }
+        }
+
+        async function loadStaffUsers() {
+            try {
+                const res = await fetch('/api/admin/users');
+                const users = await res.json();
+                const tbody = document.getElementById('staffTableBody');
+                tbody.innerHTML = '';
+
+                users.forEach(u => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${u.id}</td>
+                        <td>${u.username}</td>
+                        <td><strong>${u.role.toUpperCase()}</strong></td>
+                        <td>
+                            ${u.role !== 'super_admin' ? `<button class="btn-action-sm btn-delete" onclick="deleteStaffAccount(${u.id})">Remove</button>` : `<span style="font-size:0.8rem; color:#64748B;">Protected</span>`}
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (err) {
+                console.error('Failed to load staff users', err);
+            }
+        }
+
+        async function loadAuditLogs() {
+            try {
+                const res = await fetch('/api/admin/audit-logs');
+                const logs = await res.json();
+                const tbody = document.getElementById('auditTableBody');
+                tbody.innerHTML = '';
+
+                if (logs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #64748B;">No activity recorded yet.</td></tr>`;
+                    return;
+                }
+
+                logs.forEach(l => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><small style="color: #64748B;">${l.timestamp}</small></td>
+                        <td><strong>${l.username}</strong></td>
+                        <td>${l.action}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (err) {
+                console.error('Failed to load audit logs', err);
+            }
+        }
+
+        async function createStaffAccount() {
+            const username = document.getElementById('newStaffUser').value.trim();
+            const password = document.getElementById('newStaffPass').value.trim();
+            const msgBox = document.getElementById('staffMsg');
+
+            try {
+                const res = await fetch('/api/admin/create-staff', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, role: 'staff' })
+                });
+                const data = await res.json();
+
+                msgBox.style.display = 'block';
+                if (res.ok) {
+                    msgBox.style.color = '#22543D';
+                    msgBox.innerText = data.message;
+                    document.getElementById('newStaffUser').value = '';
+                    document.getElementById('newStaffPass').value = '';
+                    loadStaffUsers();
+                    loadAuditLogs();
+                } else {
+                    msgBox.style.color = '#9B2C2C';
+                    msgBox.innerText = data.error;
+                }
+            } catch (err) {
+                console.error('Error creating staff:', err);
+            }
+        }
+
+        async function deleteStaffAccount(userId) {
+            if (!confirm('Are you sure you want to remove this staff account?')) return;
+            try {
+                const res = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (res.ok) {
+                    loadStaffUsers();
+                    loadAuditLogs();
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) {
+                console.error('Failed to delete staff:', err);
+            }
+        }
+
+        async function changeSuperAdminPassword() {
+            const newPassword = document.getElementById('superAdminNewPass').value.trim();
+            const msgBox = document.getElementById('superPassMsg');
+
+            try {
+                const res = await fetch('/api/admin/change-password', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ new_password: newPassword })
+                });
+                const data = await res.json();
+
+                msgBox.style.display = 'block';
+                if (res.ok) {
+                    msgBox.style.color = '#22543D';
+                    msgBox.innerText = data.message;
+                    document.getElementById('superAdminNewPass').value = '';
+                    loadAuditLogs();
+                } else {
+                    msgBox.style.color = '#9B2C2C';
+                    msgBox.innerText = data.error;
+                }
+            } catch (err) {
+                console.error('Error updating password:', err);
+            }
+        }
+
+        async function logoutAdmin() {
+            await fetch('/api/admin-logout', { method: 'POST' });
+            window.location.href = '/admin';
+        }
+    </script>
+</body>
+</html>
